@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-APP_DIR="${APP_DIR:-/opt/kendy}"
+APP_DIR="${APP_DIR:-/Kendy-deploy}"
 ENV_FILE="$APP_DIR/.env"
 COMPOSE_FILE="$APP_DIR/docker-compose.prod.yml"
 

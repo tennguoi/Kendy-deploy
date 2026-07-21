@@ -9,9 +9,12 @@ Compose files in this project:
 
 Jenkins pipeline files:
 
-- `Jenkinsfile.simple.windows`: simple two-laptop setup on Windows Jenkins. It checks out both repos, copies `C:\kendy-secrets\.env`, then runs `docker compose up -d --build`.
-- `Jenkinsfile.simple.linux`: same flow for Linux/WSL Jenkins. It copies `/opt/kendy-secrets/.env`.
-- `../be/Jenkinsfile` and `../fe/Jenkinsfile`: registry/SSH production-style pipelines. Do not use these for the simple two-laptop setup unless you also set up Docker registry and SSH deploy.
+- `../be/Jenkinsfile`: backend CI pipeline. It builds/tests backend and pushes the backend Docker image.
+- `../fe/Jenkinsfile`: frontend CI pipeline. It builds/tests frontend and pushes the frontend Docker image.
+
+Required Jenkins credentials:
+
+- `dockerhub-credentials`: Username/password or token for Docker Hub.
 
 Required files on every deploy machine:
 
@@ -98,14 +101,24 @@ docker compose -f /opt/kendy/docker-compose.prod.yml config
 
 Push frontend and backend code to your Git remote. Jenkins on laptop B should watch those repositories with webhook or polling.
 
-For a simple two-laptop setup, Jenkins job flow should be:
+With the current backend/frontend Jenkinsfiles, Jenkins job flow should be:
 
 ```text
-checkout backend repo into ./be
-checkout frontend repo into ./fe
-copy the machine-local .env into ./.env
-docker compose up -d --build --remove-orphans
+backend push:
+checkout backend repo
+test backend
+build backend image
+push backend image
+
+frontend push:
+checkout frontend repo
+install/build frontend
+build frontend image
+push frontend image
 ```
+
+These Jenkinsfiles no longer SSH into the deploy machine and no longer manage `.env`.
+After image push, deploy can be run separately on the machine that owns `.env` and Docker Compose.
 
 If both laptops are in the same LAN, laptop A pushes to GitHub/GitLab, then the Git service calls Jenkins webhook on laptop B. If webhook cannot reach laptop B because it is behind NAT, use Jenkins polling every 1-5 minutes instead.
 
