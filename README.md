@@ -1,11 +1,11 @@
 # KendyDigital Deploy
 
-Server deploy directory: `/opt/kendy`.
+Server deploy directory: `/home/minh/kendy`.
 
 Compose files in this project:
 
 - `../docker-compose.yml`: local development from the project root, used by `python run.py docker`.
-- `docker-compose.prod.yml`: production/deploy compose, used by `/opt/kendy/deploy.sh`.
+- `docker-compose.prod.yml`: production/deploy compose, used by `/home/minh/kendy/deploy.sh`.
 
 Jenkins pipeline files:
 
@@ -14,7 +14,7 @@ Jenkins pipeline files:
 
 Required Jenkins credentials:
 
-- `dockerhub-credentials`: Username/password or token for Docker Hub.
+- `docker`: Username/password or token for Docker Hub.
 
 Required files on every deploy machine:
 
@@ -59,8 +59,8 @@ Deploy command used by Jenkins:
 ```sh
 BACKEND_IMAGE=registry.example.com/kendy/backend:abc123 \
 FRONTEND_IMAGE=registry.example.com/kendy/frontend:def456 \
-APP_DIR=/opt/kendy \
-/opt/kendy/deploy.sh
+APP_DIR=/home/minh/kendy \
+/home/minh/kendy/deploy.sh
 ```
 
 OAuth callback URLs:
@@ -77,24 +77,25 @@ Use this when laptop A is for coding and laptop B is the deploy machine.
 Install Docker Desktop, Git, Jenkins, and an SSH server. Create the deploy folder:
 
 ```sh
-sudo mkdir -p /opt/kendy
-sudo chown -R "$USER":"$USER" /opt/kendy
+mkdir -p /home/minh/kendy
 ```
 
-Copy these files from this `deploy/` folder into `/opt/kendy`:
+Copy these files from this `deploy/` folder into `/home/minh/kendy`:
 
 ```text
-/opt/kendy/.env
-/opt/kendy/docker-compose.prod.yml
-/opt/kendy/deploy.sh
-/opt/kendy/monitoring/
+/home/minh/kendy/.env
+/home/minh/kendy/docker-compose.prod.yml
+/home/minh/kendy/deploy.sh
+/home/minh/kendy/monitoring/
 ```
 
 Then run once:
 
 ```sh
-chmod +x /opt/kendy/deploy.sh
-docker compose -f /opt/kendy/docker-compose.prod.yml config
+chmod +x /home/minh/kendy/deploy.sh
+chmod 664 /home/minh/kendy/.env
+chmod 755 /home/minh /home/minh/kendy
+docker compose -f /home/minh/kendy/docker-compose.prod.yml config
 ```
 
 ### Laptop A: code machine
@@ -107,6 +108,7 @@ With the current backend/frontend Jenkinsfiles, Jenkins job flow should be:
 backend push:
 checkout backend repo
 test backend
+build backend (package jar)
 build backend image
 push backend image
 
