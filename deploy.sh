@@ -65,9 +65,11 @@ if ! grep -q "^BACKEND_IMAGE=.\+" "$ENV_FILE" && [ -z "${BACKEND_IMAGE:-}" ]; th
   exit 1
 fi
 
-if ! grep -q "^FRONTEND_IMAGE=.\+" "$ENV_FILE" && [ -z "${FRONTEND_IMAGE:-}" ]; then
-  echo "Lỗi: Thiếu FRONTEND_IMAGE. Truyền biến FRONTEND_IMAGE=... hoặc thêm dòng vào $ENV_FILE." >&2
-  exit 1
+# Nếu FRONTEND_IMAGE được truyền, kiểm tra có trong .env; nếu không, chỉ cảnh báo
+if [ -n "${FRONTEND_IMAGE:-}" ]; then
+  if ! grep -q "^FRONTEND_IMAGE=" "$ENV_FILE"; then
+    echo "Cảnh báo: FRONTEND_IMAGE không có trong $ENV_FILE, sẽ dùng biến môi trường hiện tại." >&2
+  fi
 fi
 
 docker compose -f "$COMPOSE_FILE" pull
